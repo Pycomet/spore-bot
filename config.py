@@ -4,7 +4,6 @@ from google.oauth2.service_account import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from models import User
 import asyncio
 import logging
 import os
@@ -12,7 +11,7 @@ import re
 from flask import Flask, request
 import telebot
 from telebot import types
-from datetime import date
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -3,23 +3,25 @@ from datetime import date
 
 
 @dataclass
-class User:
-    "User Class Repr"
-    user_id: int = 0
-    screen_name: str = ""
-    user: str = ""
-    agent: str = ""
-
+class Stock:
+    "Stock Model From Spreadsheet"
+    item: str = ""
+    price: str = ""
+    available: str = ""
+    qty_code: str = ""
 
 
 @dataclass
-class Data:
+class Order:
     "Bot Data Sheet Model"
-    name: str = ""
-    club_id: int = 0
-    agent: str = ""
-    agent_rb: int = 0
-    ref_code: str = ""
-    group_id: int = 0
+    buyer: str = ""
+    item: str = ""
+    count: int = 1
+    qty_code: str = ""
+    total: str = ""
+    payment: str = ""
+    date: str = ""
+    address: str = ""
+
 
 
