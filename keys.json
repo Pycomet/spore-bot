@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "spore-bot-app",
+  "private_key_id": "8fe97748fcdd4698672ec0ac81788324ff837076",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDdXUy4UvA1COUV\nZsVX203Dx5vX5mE9vPi5hq3reMcMZGEkoMJ8C4B75Lbl6WoutKWUz5qp/40OAlzi\nVMDJwWyWvMBVkx0i2T9GZW1EUYuMoS5KBwFo9ULc0TNEwRyV346hTqxNMWTiQBuB\ng/rLlD0+ABt9xu2TTyPfzj8lagiRTWGn1g6TVNsyq3huiz0qxjUVqzomUTy4oQbc\nwF1qHaKFsqGwLyF0pgOvn/B3inxtEGqYKvNxvTbeE27Y8Q/Sz5FpUthXGIxk2+w+\nvHemBp4jLtOqUOAmJSrvxohvrAGL7oM5GRcF36CyowXg1vKAFYfxHXSrX9JcLU0R\nCB9Up5IjAgMBAAECggEANDKDXDVmYcMSrZy5rPFP4XnodBzlUhcEuU6aJRuqJ/Bl\nfasQoQpfRheUzxreiFvdbX0UlcBmJOcGuvHMMebTsamZWrRhWu3KP1G8Va86zjLV\nhOwo93RZy1LjGXPFx0tbSQsRkvQyOy1trvkNgsKWPE/vK5XkQGeZaHUsK6jYk1Yx\nCKPwFFTt3vg7tYDnqHfC10toQWHIOzGDLVBoSKZvQN1ZL8YPA7juBj0bN4dCUw8D\nOjZVPy952MF0ExYIx0RWs2nG7qEmVYQ0uFoqUoVZ8D8l5BEBtPuJh83j/C1BkzW9\nLhXtY/y5mQoIz2cBOgyL1ZpbuJAQdhMP2QPU3esBXQKBgQDxvtCROHI5McVBcHva\nOfN5UB2GZ8FLzP6TLnQFeTmIr68aOmb4NwXn55x5sSYV68jAyhrusyBU2oaSmQg9\n/vKeOQU/PHtZXcb8owAThVSj9Zj9rd0yCVyCxBcK/XJ74di+ss1vYQrD186eQmTU\nfc8CIXh/hvKFcofVnMDDgW9xrwKBgQDqatTsXc8bTNf0+2IBgKyC0UUNRyN7lclT\nY35rnsdk2XD0MBf6j9WSFVc0d9AF0lKZrKPYKEhUki1R26r3EAUbJkoY0dsIKSxw\nX6DyarM+xolAedtccW5feWFrNMLwlK9gSaVxKQh9G7Ujpn/0sV0Lvkv4CMpZrKJP\n5utper5HzQKBgENJCgIxhNFYgf+50C8oTBUq8FzVih6P+xd6KX7Qg+wAgis5sClM\nH0+xzoKshN47F1BZsG9Z2hjkDerFv16KFHtngYddTTPNfzIYKFBGnw1XsXKCLvvb\nUS1waL19V50Vel9xou5qQzXJXk/8SNZAAhskt8Y/CEeOXjJdg+WmpB8vAoGAClKm\nCbqf0i3yHKGtUS+faStaBRmq4FhaQ0fQW2DkmvZQWRB9HdWTrBkwe+kCyh7W8Fl/\n5ZbwiHjfcglgX/zenLF09d7X7GYTxOcRKVu1hQAtLx+un0WHfMDVn2j1ZK7Hgk/7\n7x3Fd+zubyF35Qiidk/s/IE2l/hYNXiPyVdUZckCgYBmObbuMxdXM9pgVNv29vHT\nkHCDSG5MIVjMjXiLwIyEDKd3owIAODqS9hHiJPYieWNbvzyR4wrTz65kfEhkW6ag\nZ8kDlCWdtFYp9iAiAdoOAWv1PUnsUrYaMmH+wGzEuKUTJfQahWGcVZRF/f2+Ri0F\nM2XShjPfOEvfD1oDfkE55Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "spore-bot@spore-bot-app.iam.gserviceaccount.com",
+  "client_id": "111253282683593134695",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/spore-bot%40spore-bot-app.iam.gserviceaccount.com"
+}

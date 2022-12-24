@@ -2,18 +2,15 @@ import threading
 from config import *
 from utils import *
 
-# def start_menu():
-#     keyboard = types.InlineKeyboardMarkup(row_width=2)
+def menu():
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
 
-#     a = types.InlineKeyboardButton("Club Request", callback_data="request")
-#     b = types.InlineKeyboardButton("Chip Request", callback_data="chip")
-#     c = types.InlineKeyboardButton("Rake Back", callback_data="rake_back")
-#     d = types.InlineKeyboardButton("View All Clubs", callback_data="all_clubs")
-#     e = types.InlineKeyboardButton("Transactions", callback_data="payment")
-#     # e = types.InlineKeyboardButton("🔙 Go Back" callback_data="back")
+    a = types.InlineKeyboardButton("Confirm Order", callback_data="yes")
+    b = types.InlineKeyboardButton("Cancel Order", callback_data="no")
 
-#     keyboard.add(a, b, c, d, e)
-#     return keyboard
+    keyboard.add(a, b)
+    return keyboard
+
 
 order = Order()
 
@@ -21,6 +18,7 @@ order = Order()
 @bot.message_handler(commands=["start", "order"])
 def startbot(msg):
     "Entry point of the bot discussion -- https://ibb.co/1Mvm7GN"
+    print(msg.chat.id)
 
     bot.send_chat_action(msg.from_user.id, "typing")
 
@@ -49,6 +47,7 @@ def validateItem(msg):
         )
     
     else:
+        global order
         order.buyer = msg.from_user.username
         order.item = msg.text
         bot.send_message(
@@ -59,7 +58,7 @@ def validateItem(msg):
 
         question = bot.send_message(
             msg.chat.id,
-            f"How many of this items do you wish to purchase ? \nexample: ",
+            f"How many of this items do you wish to purchase ? \nexample: 2",
             parse_mode="html"
         )
         bot.register_next_step_handler(question, getItemCount)
@@ -68,21 +67,98 @@ def validateItem(msg):
 
 def getItemCount(msg):
     "Get count"
-    order.count = int(msg.text)
-    bot.reply_to(
-        msg,
-        f'{msg.text} by {order.buyer} for {order.count} {order.item}',
+    global order
+    order.count = int(msg.text) or 1
+
+    # Check availability
+    stock = db_client.get_stock(order.item)
+    
+    amount_left = int(stock.available) - order.count
+
+    if amount_left < 0:
+        bot.send_message(
+            msg.from_user.id,
+            f"You are exceeding our inventory limit. The maximum available {stock.item} is {stock.available} \n Click /order to try again.",
+            parse_mode="html"
+        )
+
+    else:
+        # bot.reply_to(
+        #     msg,
+        #     f'{msg.text} by {order.buyer} for {order.count} {order.item}',
+        # )
+
+        question = bot.send_message(
+            msg.from_user.id,
+            "Provide your address? "
+        )
+        bot.register_next_step_handler(question, getAddress)
+
+
+def getAddress(msg):
+    "Get User Address"
+    global order
+    order.address = msg.text
+    
+    question = bot.send_message(
+        msg.from_user.id,
+        "Provide your preferred payment method ?"
     )
+    bot.register_next_step_handler(question,  getPaymentMethod)
+
+def getPaymentMethod(msg):
+    "Get Payment Method"
+    global order
+
+    order.payment = msg.text
+    order.date = str(datetime.now())
+
+    stock = db_client.get_stock(order.item)
+
+    bot.send_message(
+        msg.from_user.id,
+        f"ORDER: \n\nItem: {order.item} \nPrice: {stock.price} \nCount: {order.count} \nPayment Method: {order.payment} \nAddress: {order.address}\n\nProceed?",
+        reply_markup=menu()
+    )
+    return order
 
 
-# @bot.callback_query_handler(func=lambda c: True)
-# def button_callback_answer(call):
-#     """
-#     Button Response
-#     """
-#     bot.send_chat_action(call.message.chat.id, "typing")
 
-#     if call.data == "request":
-#         pass
-#     else:
-#         pass
+
+@bot.callback_query_handler(func=lambda c: True)
+def button_callback_answer(call):
+    """
+    Button Response
+    """
+    bot.send_chat_action(call.message.chat.id, "typing")
+
+    global order
+
+    if call.data == "yes":
+        write_order_to_spreadsheet(order)
+        bot.delete_message(call.from_user.id, call.message.message_id)
+
+        bot.send_message(
+            call.from_user.id,
+            f"<b>Order Created!!</b>",
+            parse_mode="html"
+        )
+
+        bot.send_message(
+            int(ADMIN),
+            f"<b>New Order Created For @{order.buyer}!!</b>",
+            parse_mode="html"
+        )
+        order = Order()
+
+    elif call.data == "no":
+        order = Order()
+        bot.delete_message(call.from_user.id, call.message.message_id)
+
+        bot.send_message(
+            call.from_user.id,
+            f"<b>Order Cancelled!!</b>",
+            parse_mode="html"
+        )
+    else:
+        pass

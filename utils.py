@@ -51,8 +51,7 @@ def write_order_to_spreadsheet(order: Order):
         )
 
         logging.info(f"Created Order For {order.item} Update Complete")
-        data = spreadsheet["values"]
-        return data
+        return True
     except Exception as e:
         logging.error("Failed to write order into spreadsheet")
         return []
