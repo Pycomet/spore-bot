@@ -6,9 +6,8 @@ from datetime import date
 class Stock:
     "Stock Model From Spreadsheet"
     item: str = ""
-    price: str = ""
     available: str = ""
-    qty_code: str = ""
+    sheet: str = "" # Sheet ID (e.g X, Z)
 
 
 @dataclass
@@ -16,12 +15,13 @@ class Order:
     "Bot Data Sheet Model"
     buyer: str = ""
     item: str = ""
-    count: int = 1
-    qty_code: str = ""
+    note: str = ""
     total: str = ""
     payment: str = ""
     date: str = ""
     address: str = ""
+    created_at: str = ""
+    sheet: str = "" # Sheet ID (e.g X, Z)
 
 
 

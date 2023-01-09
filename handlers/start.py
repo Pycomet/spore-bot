@@ -1,6 +1,7 @@
 import threading
 from config import *
 from utils import *
+import time
 
 def menu():
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -13,7 +14,6 @@ def menu():
 
 
 order = Order()
-
 
 @bot.message_handler(commands=["start", "order"])
 def startbot(msg):
@@ -28,7 +28,8 @@ def startbot(msg):
 
     question = bot.send_message(
         msg.chat.id,
-        f"Welcome back {msg.from_user.first_name}, \n\nWhat would like to order today? \nexample: B1",
+        f"Welcome back {msg.from_user.first_name}, \n\nWhat would like to order today? \nFormat: HUB, ITEM, QTY CODE, PAYMENT METHOD, ADDRESS, DATE TIME PICK UP, NOTES(Optional) \
+            \n\nExample: <b>X, F203, D, CASH, ADDRESS, JAN 2 7PM, NOTES IF ANY</b> \n\n(For more than 1 order): <b>X, F203, D, CASH, ADDRESS, JAN 2 7PM, NOTES IF ANY | X, D22, E, CASH, Floki Highlasnf stree, Jan 3 8AM | X, B4, Q, Bank TRANSFER, Floki Highlasnf stree, Jan 3 8AM</b> ",
         parse_mode="html"
     )   
     bot.register_next_step_handler(question, validateItem)
@@ -36,129 +37,115 @@ def startbot(msg):
 
 def validateItem(msg):
     "Check if the item exists"
-    item = msg.text
-
-    stock = db_client.get_stock(item)
-    if stock == None:
-        bot.send_message(
-            msg.from_user.id,
-            f"Invalid Stock Item. \n Click /order to try again.",
-            parse_mode="html"
-        )
+    orders_list = msg.text.split("|")
     
-    else:
-        global order
-        order.buyer = msg.from_user.username
-        order.item = msg.text
-        bot.send_message(
-            msg.from_user.id,
-            f"ITEM: {stock.item} \nPRICE: {stock.price} \nIN STOCK: {stock.available}",
-            parse_mode="html"
-        )
 
-        question = bot.send_message(
-            msg.chat.id,
-            f"How many of this items do you wish to purchase ? \nexample: 2",
-            parse_mode="html"
-        )
-        bot.register_next_step_handler(question, getItemCount)
+    for raw_order in orders_list:
+        bot.send_chat_action(msg.from_user.id, "typing")
+
+        r_items = raw_order.split(",")
+        items = [i.strip() for i in r_items]
+
+        if len(items) not in [6, 7]:
+            bot.send_message(
+                msg.from_user.id,
+                f"Invalid Inputs. \n Click /order to try again.",
+                parse_mode="html"
+            )
+            continue  
+        elif items[0] not in SHEETS:
+            bot.send_message(
+                msg.from_user.id,
+                f"Invalid HUB. \n Click /order to try again.",
+                parse_mode="html"
+            )
+            continue  
+
+        stock = db_client.get_stock(items[1], items[0])
+        if stock == None:
+            bot.send_message(
+                msg.from_user.id,
+                f"Invalid Stock Item. \n Click /order to try again.",
+                parse_mode="html"
+            )
+            continue
+        
+        else:
+            order = Order()
+            order.buyer = msg.from_user.username
+            order.item = items[1]
+            order.sheet = items[0]
+            # calculate total from qty_code
+            qty_codes = db_client.get_qty_code(items[0])
+            order.total = qty_codes[items[2]]
+            order.payment = items[3]
+            order.address = items[4]
+            order.date = items[5]
+            order.created_at = str(datetime.now())
+            if len(items) == 7:
+                order.note = items[6]
+
+            bot.send_message(
+                msg.from_user.id,
+                f"ORDER DETAILS: \n\nStock {stock.sheet} Item: {stock.item} \nQuantity: {order.total} \nPayment Method: {order.payment} \nDate Time Pick Up: {order.date} \nAddress: {order.address}",
+                parse_mode="html"
+            )
+            bot.send_chat_action(msg.from_user.id, "typing")
+
+            stock = db_client.get_stock(item=order.item, sheet=order.sheet)
+
+            new_available = int(stock.available) - int(order.total)
+
+            if new_available >= 0:
+
+                # UPDATE STOCK SHEETS
+
+                write_order_to_spreadsheet(order)
+
+                bot.send_message(
+                    msg.from_user.id,
+                    f"<b>Order Created!!</b>",
+                    parse_mode="html"
+                )
+
+                bot.send_message(
+                    int(ADMIN),
+                    f"<b>New Order Created For @{order.buyer}!!</b>",
+                    parse_mode="html"
+                )
+            
+            else:
+                bot.send_message(
+                    msg.from_user.id,
+                    f"<b>Order Canceled! Only {stock.available} items available</b>",
+                    parse_mode="html"
+                )
+            continue
+
+
+# @bot.callback_query_handler(func=lambda c: True)
+# def button_callback_answer(call):
+#     """
+#     Button Response
+#     """
+#     bot.send_chat_action(call.message.chat.id, "typing")
+
+#     global order
+
+#     if call.data == "yes":
 
 
 
-def getItemCount(msg):
-    "Get count"
-    global order
-    order.count = int(msg.text) or 1
-
-    # Check availability
-    stock = db_client.get_stock(order.item)
-    
-    amount_left = int(stock.available) - order.count
-
-    if amount_left < 0:
-        bot.send_message(
-            msg.from_user.id,
-            f"You are exceeding our inventory limit. The maximum available {stock.item} is {stock.available} \n Click /order to try again.",
-            parse_mode="html"
-        )
-
-    else:
-        # bot.reply_to(
-        #     msg,
-        #     f'{msg.text} by {order.buyer} for {order.count} {order.item}',
-        # )
-
-        question = bot.send_message(
-            msg.from_user.id,
-            "Provide your address? "
-        )
-        bot.register_next_step_handler(question, getAddress)
 
 
-def getAddress(msg):
-    "Get User Address"
-    global order
-    order.address = msg.text
-    
-    question = bot.send_message(
-        msg.from_user.id,
-        "Provide your preferred payment method ?"
-    )
-    bot.register_next_step_handler(question,  getPaymentMethod)
+#     elif call.data == "no":
+#         order = Order()
+#         bot.delete_message(call.from_user.id, call.message.message_id)
 
-def getPaymentMethod(msg):
-    "Get Payment Method"
-    global order
-
-    order.payment = msg.text
-    order.date = str(datetime.now())
-
-    stock = db_client.get_stock(order.item)
-
-    bot.send_message(
-        msg.from_user.id,
-        f"ORDER: \n\nItem: {order.item} \nPrice: {stock.price} \nCount: {order.count} \nPayment Method: {order.payment} \nAddress: {order.address}\n\nProceed?",
-        reply_markup=menu()
-    )
-    return order
-
-
-
-
-@bot.callback_query_handler(func=lambda c: True)
-def button_callback_answer(call):
-    """
-    Button Response
-    """
-    bot.send_chat_action(call.message.chat.id, "typing")
-
-    global order
-
-    if call.data == "yes":
-        write_order_to_spreadsheet(order)
-        bot.delete_message(call.from_user.id, call.message.message_id)
-
-        bot.send_message(
-            call.from_user.id,
-            f"<b>Order Created!!</b>",
-            parse_mode="html"
-        )
-
-        bot.send_message(
-            int(ADMIN),
-            f"<b>New Order Created For @{order.buyer}!!</b>",
-            parse_mode="html"
-        )
-        order = Order()
-
-    elif call.data == "no":
-        order = Order()
-        bot.delete_message(call.from_user.id, call.message.message_id)
-
-        bot.send_message(
-            call.from_user.id,
-            f"<b>Order Cancelled!!</b>",
-            parse_mode="html"
-        )
-    else:
-        pass
+#         bot.send_message(
+#             call.from_user.id,
+#             f"<b>Order Canceled!!</b>",
+#             parse_mode="html"
+#         )
+#     else:
+#         pass

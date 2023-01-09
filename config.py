@@ -37,3 +37,4 @@ app = Flask(__name__)
 
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 
+SHEETS = os.getenv("SHEETS").split(",")
