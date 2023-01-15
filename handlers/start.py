@@ -61,7 +61,7 @@ def validateItem(msg):
         )
         return
 
-    stock = db_client.get_stock(items[1], items[0])
+    stock = db_client.get_stock(first_order_items[1], first_order_items[0])
     if stock == None:
         bot.send_message(
             msg.from_user.id,
